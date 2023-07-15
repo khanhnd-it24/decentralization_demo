@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://decentralization_admin:secret@localhost:5432/decentralization_db?schema=public"
+}
+
+enum Action {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  role   Role @relation(fields: [roleId], references: [id])
+  roleId Int   @map("role_id")
+
+  @@map("users")
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String
+  isAdmin   Boolean  @map("is_admin") @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  abilities Ability[]
+  users    User[]
+
+  @@map("roles")
+}
+
+model Ability {
+  id        Int      @id @default(autoincrement())
+  action    Action
+  entity    String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  role      Role    @relation(fields: [roleId], references: [id])
+  roleId    Int      @map("role_id")
+
+  @@map("abilities")
+}
